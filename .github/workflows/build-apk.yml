@@ -1,4 +1,4 @@
-name: Build Flutter APK
+name: Build Android APK (Expo EAS)
 
 on:
   push:
@@ -13,29 +13,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.22.3'
-          channel: stable
-
-      - name: Debug project structure
-        run: ls -R
+          node-version: 20
+          cache: npm
 
       - name: Install dependencies
-        run: flutter pub get
+        run: npm install
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+      - name: Login to Expo
+        run: eas whoami
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Android APK
+        run: eas build --platform android --profile preview --non-interactive --no-wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Done
+        run: echo "Build started on Expo servers"
