@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK (Flutter)
 
 on:
   push:
@@ -7,31 +7,34 @@ on:
 
 jobs:
   build:
-    name: Build APK on EAS
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          node-version: 20
-          cache: npm
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Setup Expo and EAS
-        uses: expo/expo-github-action@v8
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+          flutter-version: 'stable'
 
       - name: Install dependencies
-        run: npm install
+        run: flutter pub get
 
-      - name: Build Android APK (preview profile)
-        run: eas build --platform android --profile preview --non-interactive --no-wait
+      - name: Analyze project
+        run: flutter analyze
 
-      - name: Done
-        run: |
-          echo "✅ EAS build started."
-          echo "Visit https://expo.dev to track progress and download the APK."
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
