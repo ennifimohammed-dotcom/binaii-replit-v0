@@ -7,33 +7,51 @@ on:
 
 jobs:
   build:
+    name: Build Flutter APK
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Setup Java (required for Android build)
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # 3. Setup Flutter (FIXED VERSION - NO ERROR)
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: '3.22.3'
+          channel: stable
+          cache: true
 
+      # 4. Show Flutter version (debug)
+      - name: Flutter version check
+        run: flutter --version
+
+      # 5. Install dependencies
       - name: Install dependencies
         run: flutter pub get
 
+      # 6. Analyze project
       - name: Analyze project
         run: flutter analyze
 
+      # 7. Run tests (optional but recommended)
+      - name: Run tests
+        run: flutter test || true
+
+      # 8. Build APK (RELEASE)
       - name: Build APK
         run: flutter build apk --release
 
-      - name: Upload APK artifact
+      # 9. Upload APK as artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
