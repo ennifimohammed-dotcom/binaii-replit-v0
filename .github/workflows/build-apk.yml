@@ -10,30 +10,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Setup Node (NO CACHE = NO ERROR)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
+      # 3. Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # 4. Install EAS CLI
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
-      - name: Login to Expo
+      # 5. Login Expo (token required)
+      - name: Expo authentication
         run: eas whoami
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Build Android APK
+      # 6. Build Android APK
+      - name: Build APK (EAS)
         run: eas build --platform android --profile preview --non-interactive --no-wait
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
+      # 7. Done message
       - name: Done
-        run: echo "Build started on Expo servers"
+        run: echo "✅ Build started successfully on Expo servers"
